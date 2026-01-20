@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+pypdf
+huggingface_hub
+sentence-transformers
+pinecone-client
+python-multipart
