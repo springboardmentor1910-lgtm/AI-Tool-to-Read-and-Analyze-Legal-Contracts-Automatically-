@@ -119,7 +119,7 @@ function App() {
         params: { doc_id: docId, tone, focus, structure }
       });
       setAnalysisData(res.data.analysis);
-      setReport(res.data.final_report);
+      setReport(res.data.report);
       fetchHistory();
     } catch (err) {
       console.error(err);
@@ -544,7 +544,7 @@ function App() {
                   </div>
                 </div>
 
-                <button className="generate-btn" onClick={() => { handleAnalyze(); setShowReport(true); }}>
+                <button className="generate-btn" onClick={async () => { await handleAnalyze(); setShowReport(true); }}>
                   RE-GENERATE BUFFER
                 </button>
 
