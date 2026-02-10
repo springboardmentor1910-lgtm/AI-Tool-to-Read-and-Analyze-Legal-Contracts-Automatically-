@@ -1,0 +1,19 @@
+streamlit>=1.35.0
+altair<6
+pandas
+requests
+plotly
+python-dotenv
+# Core App dependencies
+langchain
+langchain-groq
+langchain-huggingface
+langchain-pinecone
+langchain-community
+langgraph
+pinecone-client
+fastapi
+uvicorn
+python-multipart
+opencv-python-headless
+pypdf
