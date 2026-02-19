@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Contract Analysis System
 
 AI-powered contract analysis with 4 specialized agents: Compliance, Finance, Legal, and Operations.
