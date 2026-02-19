@@ -16,7 +16,6 @@ class AgentRole(Enum):
 class PromptTemplates:
     """Structured prompt templates for agent communication."""
     
-    # System prompts for each agent type
     SYSTEM_PROMPTS = {
         AgentRole.COMPLIANCE: """You are a Compliance Analyst specializing in regulatory compliance, 
 industry standards, and legal requirements. Your role is to analyze contracts and identify 
@@ -78,7 +77,6 @@ comprehensive analysis coverage."""
 
 """
         
-        # Role-specific analysis instructions
         analysis_instructions = {
             AgentRole.COMPLIANCE: """Focus on:
 - Regulatory compliance requirements (GDPR, HIPAA, SOX, etc.)
@@ -92,7 +90,8 @@ Provide a structured analysis with:
 1. Key compliance findings
 2. Specific regulatory references
 3. Risk assessment
-4. Recommendations for compliance improvement""",
+4. Recommendations for compliance improvement
+5. Confidence Score: [0-100] (based on clarity and completeness of the contract text)""",
             
             AgentRole.FINANCE: """Focus on:
 - Payment terms and schedules
@@ -107,7 +106,8 @@ Provide a detailed financial analysis with:
 1. Financial summary (costs, revenues, payment terms)
 2. Risk assessment (financial risks, contingencies)
 3. Budget impact analysis
-4. Recommendations for financial optimization""",
+4. Recommendations for financial optimization
+5. Confidence Score: [0-100] (based on clarity and completeness of the contract text)""",
             
             AgentRole.LEGAL: """Focus on:
 - Legal terms and conditions
@@ -122,7 +122,8 @@ Provide a comprehensive legal analysis with:
 1. Key legal terms and clauses
 2. Risk assessment (legal risks, liabilities)
 3. Clause-by-clause analysis of critical sections
-4. Recommendations for legal protection""",
+4. Recommendations for legal protection
+5. Confidence Score: [0-100] (based on clarity and completeness of the contract text)""",
             
             AgentRole.OPERATIONS: """Focus on:
 - Service level agreements (SLAs) and performance metrics
@@ -137,7 +138,8 @@ Provide a practical operational analysis with:
 1. Operational requirements summary
 2. Timeline and milestone analysis
 3. Resource and capacity assessment
-4. Recommendations for operational efficiency"""
+4. Recommendations for operational efficiency
+5. Confidence Score: [0-100] (based on clarity and completeness of the contract text)"""
         }
         
         base_prompt += analysis_instructions.get(role, "Provide a comprehensive analysis.")
@@ -250,13 +252,15 @@ Analysis Sequence: {', '.join(planning_info.get('analysis_sequence', []))}
 3. Prioritizes critical findings across all domains
 4. Provides integrated recommendations
 5. Identifies any gaps in the analysis
+6. Overall Confidence Score: [0-100] (based on agent agreement and analysis quality)
 
 Format your response as:
 - Executive Summary
 - Key Findings (by domain)
 - Critical Issues and Risks
 - Integrated Recommendations
-- Analysis Gaps (if any)"""
+- Analysis Gaps (if any)
+- Overall Confidence Score: [Score]"""
         
         return prompt
     

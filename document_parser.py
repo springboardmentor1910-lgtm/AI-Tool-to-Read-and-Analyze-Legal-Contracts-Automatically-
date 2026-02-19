@@ -128,17 +128,15 @@ class DocumentParser:
         chunk_index = 0
         
         for word in words:
-            word_length = len(word) + 1  # +1 for space
+            word_length = len(word) + 1
             
             if current_length + word_length > chunk_size and current_chunk:
-                # Save current chunk
                 chunks.append({
                     "text": " ".join(current_chunk),
                     "chunk_index": chunk_index
                 })
                 chunk_index += 1
                 
-                # Start new chunk with overlap
                 overlap_words = current_chunk[-chunk_overlap:] if len(current_chunk) > chunk_overlap else current_chunk
                 current_chunk = overlap_words + [word]
                 current_length = sum(len(w) + 1 for w in current_chunk)
@@ -146,7 +144,6 @@ class DocumentParser:
                 current_chunk.append(word)
                 current_length += word_length
         
-        # Add final chunk
         if current_chunk:
             chunks.append({
                 "text": " ".join(current_chunk),

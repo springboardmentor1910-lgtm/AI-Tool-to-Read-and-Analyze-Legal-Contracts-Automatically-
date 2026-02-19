@@ -13,9 +13,7 @@ class FreeLLMProvider:
         """Get a free LLM provider. Tries Groq first, then Hugging Face."""
         if os.getenv("DISABLE_EXTERNAL_LLM", "0") == "1":
             print("⚙️  External LLMs disabled via env; using DummyLLM.")
-            # Fallback below will be used
         else:
-            # Try Groq first (free tier, very fast)
             groq_api_key = os.getenv("GROQ_API_KEY")
             if groq_api_key:
                 try:
@@ -32,7 +30,6 @@ class FreeLLMProvider:
                 except Exception as e:
                     print(f"⚠️  Groq failed: {e}")
             
-            # Try Hugging Face
             hf_token = os.getenv("HUGGINGFACE_API_TOKEN")
             if hf_token:
                 try:
@@ -50,7 +47,6 @@ class FreeLLMProvider:
                 except Exception as e:
                     print(f"⚠️  Hugging Face failed: {e}")
             
-            # Try Ollama (local)
             try:
                 try:
                     from langchain_ollama import ChatOllama
@@ -66,7 +62,6 @@ class FreeLLMProvider:
                 print(f"⚠️  Ollama failed: {e}")
                 print("   (Make sure Ollama is installed and running: https://ollama.com/)")
         
-        # Fallback: lightweight local dummy LLM for offline validation
         try:
             from langchain_core.messages import AIMessage
         except Exception:

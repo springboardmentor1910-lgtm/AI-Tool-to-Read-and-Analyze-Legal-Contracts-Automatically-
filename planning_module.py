@@ -63,9 +63,7 @@ class PlanningModule:
         response = self.llm.invoke(messages)
         response_text = response.content
         
-        # Try to parse JSON from response
         try:
-            # Extract JSON from response if wrapped in markdown or text
             if "```json" in response_text:
                 json_start = response_text.find("```json") + 7
                 json_end = response_text.find("```", json_start)
@@ -77,14 +75,11 @@ class PlanningModule:
             
             plan = json.loads(response_text)
         except (json.JSONDecodeError, ValueError):
-            # Fallback: create default plan if JSON parsing fails
             plan = self._create_default_plan(contract_text)
         
         return plan
     
     def _create_default_plan(self, contract_text: str) -> Dict[str, Any]:
-        """Create a default analysis plan if classification fails."""
-        # Simple keyword-based domain detection
         text_lower = contract_text.lower()
         
         domain = ContractDomain.GENERAL.value
@@ -145,7 +140,6 @@ class PlanningModule:
         """
         plan = self.classify_domain(contract_text, metadata)
         
-        # Enhance plan with additional coordination details
         plan["coordination_strategy"] = self._determine_coordination_strategy(plan)
         plan["expected_outputs"] = self._determine_expected_outputs(plan)
         
@@ -200,7 +194,6 @@ class PlanningModule:
         agent_info = agents[agent_name]
         priority = agent_info.get("priority", "medium")
         
-        # Activate all agents, but priority determines execution order
         return True
     
 

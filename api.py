@@ -20,7 +20,6 @@ analyzer = ContractAnalyzer(use_free_model=True)
 
 @app.get("/")
 async def root():
-    """Root endpoint."""
     return {
         "message": "Contract Analysis API",
         "version": "1.0.0",
@@ -35,7 +34,6 @@ async def root():
 
 @app.get("/api/v1/health")
 async def health_check():
-    """Health check endpoint."""
     return {"status": "healthy", "service": "contract-analysis-api"}
 
 
@@ -50,7 +48,6 @@ async def upload_contract(file: UploadFile = File(...)) -> Dict[str, Any]:
     Returns:
         Document ID and metadata
     """
-    # Validate file type
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ['.pdf', '.docx', '.txt']:
         raise HTTPException(
@@ -58,13 +55,11 @@ async def upload_contract(file: UploadFile = File(...)) -> Dict[str, Any]:
             detail=f"Unsupported file type: {file_ext}. Supported: .pdf, .docx, .txt"
         )
     
-    # Save uploaded file to uploads directory
     upload_dir = Path("uploads")
     upload_dir.mkdir(exist_ok=True)
     
     file_path = upload_dir / file.filename
     
-    # Handle duplicate filenames by appending counter
     counter = 1
     while file_path.exists():
         stem = Path(file.filename).stem
@@ -76,10 +71,7 @@ async def upload_contract(file: UploadFile = File(...)) -> Dict[str, Any]:
         f.write(content)
     
     try:
-        # Upload and process document
         document_id = analyzer.upload_document(str(file_path))
-        
-        # Get document metadata
         doc_info = analyzer.documents.get(document_id, {})
         
         return {
@@ -90,7 +82,6 @@ async def upload_contract(file: UploadFile = File(...)) -> Dict[str, Any]:
             "message": "Document uploaded and processed successfully"
         }
     except Exception as e:
-        # Clean up file on error
         if file_path.exists():
             os.unlink(file_path)
         raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
@@ -159,11 +150,9 @@ async def analyze_contract(
     if document_id not in analyzer.documents:
         raise HTTPException(status_code=404, detail=f"Document {document_id} not found")
     
-    # Parse agent roles if provided
     roles_list = None
     if agent_roles:
         roles_list = [r.strip() for r in agent_roles.split(",")]
-        # Validate roles
         valid_roles = ["compliance", "finance", "legal", "operations"]
         invalid_roles = [r for r in roles_list if r not in valid_roles]
         if invalid_roles:
@@ -174,7 +163,6 @@ async def analyze_contract(
     
     try:
         if fast:
-            # Fast path: run agents in parallel without planning
             doc_info = analyzer.documents[document_id]
             parsed = analyzer.parser.parse_document(doc_info["file_path"])
             full_text = parsed["text"]
@@ -190,7 +178,6 @@ async def analyze_contract(
                 "planning_info": {}
             }
         else:
-            # Full analysis with planning and coordination
             results = analyzer.analyze_contract(document_id, roles_list)
             return {
                 "success": True,

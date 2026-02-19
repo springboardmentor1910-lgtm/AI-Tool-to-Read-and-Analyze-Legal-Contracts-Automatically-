@@ -17,7 +17,6 @@ def merge_dicts(left: Dict, right: Dict) -> Dict:
 def merge_lists(left: List, right: List) -> List:
     """Merge two lists, avoiding duplicates."""
     combined = left + right
-    # Remove duplicates while preserving order
     seen = set()
     result = []
     for item in combined:
@@ -34,7 +33,7 @@ class AgentState(TypedDict):
     coordination_messages: Annotated[List[str], merge_lists]
     current_agent: str
     completed_agents: Annotated[List[str], merge_lists]
-    agent_roles: List[str]  # List of agents to execute
+    agent_roles: List[str]
 
 
 class BaseAgent:
@@ -54,7 +53,7 @@ class BaseAgent:
             return free_llm
         raise Exception("No working LLM found. Please set GROQ_API_KEY in .env, OR ensure Ollama is installed and running (https://ollama.com/).")
     
-    def analyze(self, contract_text: str, context: Optional[Dict] = None) -> Dict[str, str]:
+    def analyze(self, contract_text: str, context: Optional[Dict] = None) -> Dict[str, Any]:
         """Analyze contract text from the agent's perspective."""
         prompt = PromptTemplates.create_analysis_prompt(self.agent_role, contract_text, context)
         messages = [
@@ -63,11 +62,30 @@ class BaseAgent:
         ]
         
         response = self.llm.invoke(messages)
+        content = response.content
         
-        return {
+        confidence = None
+        import re
+        match = re.search(
+            r"(?:Overall\s+)?Confidence(?:\s+Score)?\s*[:\-]?\s*\[?\s*(\d{1,3})",
+            content,
+            re.IGNORECASE,
+        )
+        if match:
+            try:
+                value = int(match.group(1))
+                if 0 <= value <= 100:
+                    confidence = value
+            except ValueError:
+                confidence = None
+        
+        result: Dict[str, Any] = {
             "role": self.role,
-            "analysis": response.content
+            "analysis": content,
         }
+        if confidence is not None:
+            result["confidence"] = confidence
+        return result
 
 
 class ComplianceAgent(BaseAgent):
@@ -136,17 +154,14 @@ class AgentOrchestrator:
         """Build LangGraph for agent coordination."""
         workflow = StateGraph(AgentState)
         
-        # Add nodes for each agent
         workflow.add_node("compliance", self._compliance_node)
         workflow.add_node("finance", self._finance_node)
         workflow.add_node("legal", self._legal_node)
         workflow.add_node("operations", self._operations_node)
         workflow.add_node("coordinate", self._coordinate_node)
         
-        # Set entry point
         workflow.set_entry_point("compliance")
         
-        # Define edges based on planning sequence or default sequence
         workflow.add_edge("compliance", "finance")
         workflow.add_edge("finance", "legal")
         workflow.add_edge("legal", "operations")
@@ -159,7 +174,7 @@ class AgentOrchestrator:
         """Compliance agent node."""
         agent_roles = state.get("agent_roles", list(self.agents.keys()))
         if "compliance" not in agent_roles:
-            return {"current_agent": "compliance"}  # Skip this agent
+            return {"current_agent": "compliance"}
         
         agent = self.agents["compliance"]
         context = self._get_agent_context("compliance", state)
@@ -171,7 +186,6 @@ class AgentOrchestrator:
             "current_agent": "compliance"
         }
         
-        # Add coordination message
         if "legal" in state.get("planning_info", {}).get("agents", {}).get("compliance", {}).get("dependencies", []):
             message = PromptTemplates.create_inter_agent_message(
                 AgentRole.COMPLIANCE, AgentRole.LEGAL,
@@ -186,7 +200,7 @@ class AgentOrchestrator:
         """Finance agent node."""
         agent_roles = state.get("agent_roles", list(self.agents.keys()))
         if "finance" not in agent_roles:
-            return {"current_agent": "finance"}  # Skip this agent
+            return {"current_agent": "finance"}
         
         agent = self.agents["finance"]
         context = self._get_agent_context("finance", state)
@@ -202,7 +216,7 @@ class AgentOrchestrator:
         """Legal agent node."""
         agent_roles = state.get("agent_roles", list(self.agents.keys()))
         if "legal" not in agent_roles:
-            return {"current_agent": "legal"}  # Skip this agent
+            return {"current_agent": "legal"}
         
         agent = self.agents["legal"]
         context = self._get_agent_context("legal", state)
@@ -218,7 +232,7 @@ class AgentOrchestrator:
         """Operations agent node."""
         agent_roles = state.get("agent_roles", list(self.agents.keys()))
         if "operations" not in agent_roles:
-            return {"current_agent": "operations"}  # Skip this agent
+            return {"current_agent": "operations"}
         
         agent = self.agents["operations"]
         context = self._get_agent_context("operations", state)
@@ -232,7 +246,6 @@ class AgentOrchestrator:
     
     def _coordinate_node(self, state: AgentState) -> Dict[str, Any]:
         """Coordination node to synthesize results."""
-        # Use coordinator prompt to synthesize results
         coordinator_prompt = PromptTemplates.create_coordination_prompt(
             state["agent_results"],
             state.get("planning_info")
@@ -247,13 +260,33 @@ class AgentOrchestrator:
         ]
         
         response = coordinator_llm.invoke(messages)
+        content = response.content
+        
+        overall_confidence = None
+        import re
+        match = re.search(
+            r"Overall\s+Confidence(?:\s+Score)?\s*[:\-]?\s*\[?\s*(\d{1,3})",
+            content,
+            re.IGNORECASE,
+        )
+        if match:
+            try:
+                value = int(match.group(1))
+                if 0 <= value <= 100:
+                    overall_confidence = value
+            except ValueError:
+                overall_confidence = None
+        
+        coord_result: Dict[str, Any] = {
+            "role": "Coordinator",
+            "analysis": content,
+        }
+        if overall_confidence is not None:
+            coord_result["confidence"] = overall_confidence
         
         return {
             "agent_results": {
-                "coordination": {
-                    "role": "Coordinator",
-                    "analysis": response.content
-                }
+                "coordination": coord_result
             }
         }
     
@@ -263,7 +296,6 @@ class AgentOrchestrator:
         planning_info = state.get("planning_info", {})
         dependencies = planning_info.get("agents", {}).get(agent_name, {}).get("dependencies", [])
         
-        # Add results from dependent agents
         for dep_agent in dependencies:
             if dep_agent in state["agent_results"]:
                 context[dep_agent] = state["agent_results"][dep_agent].get("analysis", "")
@@ -288,7 +320,6 @@ class AgentOrchestrator:
         else:
             agent_roles = [r.lower() for r in agent_roles]
         
-        # Initialize state
         initial_state: AgentState = {
             "contract_text": contract_text,
             "planning_info": planning_info or {},
@@ -299,7 +330,6 @@ class AgentOrchestrator:
             "agent_roles": agent_roles
         }
         
-        # Run graph
         final_state = self.graph.invoke(initial_state)
         
         return {
@@ -325,4 +355,3 @@ class AgentOrchestrator:
                 except Exception as e:
                     analyses[role] = {"role": role, "analysis": f"Error: {e}"}
         return {"analyses": analyses, "completed_agents": roles, "coordination_messages": []}
-

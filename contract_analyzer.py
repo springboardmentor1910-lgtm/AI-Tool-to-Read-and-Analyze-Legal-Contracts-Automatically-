@@ -8,7 +8,6 @@ from agents import AgentOrchestrator
 from planning_module import PlanningModule
 from langchain_huggingface import HuggingFaceEmbeddings
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import os
 
 class ContractAnalyzer:
     """Main contract analysis system."""
@@ -19,7 +18,6 @@ class ContractAnalyzer:
         self.orchestrator = AgentOrchestrator(use_free_model=use_free_model)
         self.planner = PlanningModule(use_free_model=use_free_model)
         self.documents = {}
-        # Vector store setup (Pinecone preferred if available, else Chroma)
         self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
         self.vector_store = None
         self.vector_store_type = None
@@ -92,7 +90,6 @@ class ContractAnalyzer:
         if document_id is None:
             document_id = str(uuid.uuid4())
         
-        # Parse document
         parsed = self.parser.parse_document(file_path)
         text = parsed["text"]
         metadata = parsed["metadata"]
@@ -108,7 +105,6 @@ class ContractAnalyzer:
         else:
             num_chunks = 0
 
-        # Store document metadata
         self.documents[document_id] = {
             "file_path": file_path,
             "metadata": metadata,
@@ -132,32 +128,26 @@ class ContractAnalyzer:
         if document_id not in self.documents:
             raise ValueError(f"Document {document_id} not found")
         
-        # Read document text
         doc_info = self.documents[document_id]
         parsed = self.parser.parse_document(doc_info["file_path"])
         full_text = parsed["text"]
         metadata = doc_info.get("metadata", {})
         
-        # Generate planning information
         planning_info = self.planner.generate_agent_plan(full_text, metadata)
         
-        # Determine agent roles based on planning if not specified
         if agent_roles is None:
-            # Use planning to determine which agents to activate
             agent_roles = []
             agents_info = planning_info.get("agents", {})
             for agent_name, agent_info in agents_info.items():
                 if self.planner.should_activate_agent(agent_name, planning_info):
                     agent_roles.append(agent_name)
         
-        # Run agent analysis with LangGraph coordination
         analysis_results = self.orchestrator.analyze_contract(
             full_text, 
             planning_info=planning_info,
             agent_roles=agent_roles
         )
         
-        # Add document metadata and planning info
         analysis_results["document_id"] = document_id
         analysis_results["document_metadata"] = metadata
         analysis_results["planning_info"] = planning_info
@@ -178,13 +168,11 @@ class ContractAnalyzer:
         if document_id not in self.documents:
             raise ValueError(f"Document {document_id} not found")
         
-        # Read document text
         doc_info = self.documents[document_id]
         parsed = self.parser.parse_document(doc_info["file_path"])
         full_text = parsed["text"]
         metadata = doc_info.get("metadata", {})
         
-        # Classify domain
         planning_info = self.planner.generate_agent_plan(full_text, metadata)
         
         return {
@@ -235,7 +223,6 @@ class ContractAnalyzer:
         return condensed
 
     def extract_clauses_parallel(self, document_id: str, domains: Optional[List[str]] = None, k: int = 5) -> Dict[str, List[Dict]]:
-        """Extract domain-specific clauses in parallel using vector search."""
         if document_id not in self.documents:
             raise ValueError(f"Document {document_id} not found")
         queries = {
@@ -291,7 +278,6 @@ class ContractAnalyzer:
                 "query": it.get("query", "")
             })
         if texts:
-            # Retry logic for vector store storage
             max_retries = 3
             for attempt in range(max_retries):
                 try:
@@ -306,24 +292,20 @@ class ContractAnalyzer:
                         time.sleep(2 * (attempt + 1))
 
     def compliance_risk_pipeline(self, document_id: str, k: int = 5) -> Dict:
-        """Structured pipeline: extract clauses and analyze compliance risks."""
         clauses = self.extract_clauses_parallel(document_id, domains=["compliance"], k=k)["compliance"]
         self.store_intermediate_results(document_id, clauses, stage="extraction", agent="compliance")
-        # Use extracted clauses as context if available, else full text
         if clauses:
             contract_text = "\n\n".join([c["text"] for c in clauses])
         else:
             contract_text = self.parser.parse_document(self.documents[document_id]["file_path"])["text"]
             
         parallel = self.orchestrator.analyze_contract_parallel(contract_text, agent_roles=["compliance"])
-        # Store analysis intermediate
         analyses = parallel.get("analyses", {})
         items = [{"text": v.get("analysis", ""), "query": "compliance-analysis", "chunk_index": -1} for v in analyses.values()]
         self.store_intermediate_results(document_id, items, stage="analysis", agent="compliance")
         return {"clauses": clauses, "analyses": analyses}
 
     def financial_risk_pipeline(self, document_id: str, k: int = 5) -> Dict:
-        """Structured pipeline: extract clauses and analyze financial risks."""
         clauses = self.extract_clauses_parallel(document_id, domains=["finance"], k=k)["finance"]
         self.store_intermediate_results(document_id, clauses, stage="extraction", agent="finance")
         if clauses:
@@ -337,12 +319,10 @@ class ContractAnalyzer:
         return {"clauses": clauses, "analyses": parallel.get("analyses", {})}
 
     def simulate_multi_turn(self, document_id: str) -> Dict:
-        """Test multi-turn interaction between domain-specific agents (compliance and finance)."""
         parsed = self.parser.parse_document(self.documents[document_id]["file_path"])
         text = parsed["text"]
         comp = self.orchestrator.agents["compliance"].analyze(text, None)
         
-        # Finance asks follow-up based on compliance findings
         from langchain_core.messages import HumanMessage, SystemMessage
         finance_agent = self.orchestrator.agents["finance"]
         
@@ -359,7 +339,6 @@ Based on these compliance findings, please assess the specific financial exposur
         fin_resp = finance_agent.llm.invoke(messages)
         fin_analysis = fin_resp.content
         
-        # Compliance responds to finance concerns
         from prompt_templates import AgentRole, PromptTemplates
         second_msg = f"""Finance Agent raised these cost concerns:
 {fin_analysis[:1000]}
