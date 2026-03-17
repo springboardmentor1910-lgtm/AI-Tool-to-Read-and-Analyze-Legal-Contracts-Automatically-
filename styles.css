@@ -1,0 +1,187 @@
+.stApp {
+    background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #020617 100%);
+    color: #e5e7eb;
+}
+.block-container {
+    max-width: 1200px;
+    padding-top: 1.5rem;
+    padding-bottom: 3rem;
+}
+h1, h2, h3 {
+    color: #f9fafb;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+p, span, label, .stText, .stMarkdown {
+    color: #e5e7eb;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.hero-layout {
+    margin-top: 1.75rem;
+    margin-bottom: 1.5rem;
+}
+.hero-title {
+    font-size: 2.1rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.25rem;
+}
+.hero-subtitle {
+    font-size: 0.95rem;
+    color: #9ca3af;
+    max-width: 32rem;
+}
+.upload-card {
+    border-radius: 1.4rem;
+    padding: 1.1rem 1.25rem;
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), rgba(15, 23, 42, 0.95));
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    box-shadow: 0 22px 55px rgba(15, 23, 42, 0.9);
+}
+[data-testid="stFileUploader"] {
+    background: rgba(15, 23, 42, 0.92);
+    border-radius: 1rem;
+    padding: 0.9rem 0.85rem;
+    border: 1px dashed rgba(148, 163, 184, 0.9);
+}
+[data-testid="stFileUploader"] section {
+    color: #e5e7eb;
+}
+[data-testid="stFileUploader"] label {
+    color: #e5e7eb;
+}
+.upload-helper {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-top: 0.3rem;
+}
+.confidence-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.conf-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+}
+.conf-good {
+    color: #bbf7d0;
+}
+.conf-good .conf-dot {
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.28);
+}
+.conf-moderate {
+    color: #fee2a0;
+}
+.conf-moderate .conf-dot {
+    background: #facc15;
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.28);
+}
+.conf-bad {
+    color: #fecaca;
+}
+.conf-bad .conf-dot {
+    background: #ef4444;
+    box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.28);
+}
+.stButton>button {
+    border-radius: 999px;
+    padding: 0.4rem 1.6rem;
+    border: 1px solid rgba(191, 219, 254, 0.85);
+    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    color: #020617;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 16px 35px rgba(37, 99, 235, 0.7);
+    transition: transform 120ms ease-out, box-shadow 120ms ease-out, background 120ms ease-out;
+}
+.stButton>button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.85);
+}
+.stButton>button:active {
+    transform: translateY(0);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.9);
+}
+.agent-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.4rem;
+}
+.agent-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #9ca3af;
+}
+.agent-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+.agent-conf-pill {
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 550;
+}
+.agent-conf-good {
+    background: rgba(22, 163, 74, 0.14);
+    color: #bbf7d0;
+    border: 1px solid rgba(22, 163, 74, 0.8);
+}
+.agent-conf-moderate {
+    background: rgba(234, 179, 8, 0.16);
+    color: #fef9c3;
+    border: 1px solid rgba(234, 179, 8, 0.9);
+}
+.agent-conf-bad {
+    background: rgba(220, 38, 38, 0.2);
+    color: #fee2e2;
+    border: 1px solid rgba(220, 38, 38, 0.9);
+}
+.sidebar .sidebar-content {
+    background: #020617;
+}
+[data-testid="stSidebar"] {
+    background: radial-gradient(circle at top, #020617 0, #020617 100%);
+    border-right: 1px solid rgba(31, 41, 55, 0.9);
+}
+[data-testid="stSidebar"] h2, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span {
+    color: #e5e7eb;
+}
+button[data-testid*="view_"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 1.2rem !important;
+    color: #9ca3af !important;
+    transition: color 120ms ease-out, transform 120ms ease-out;
+}
+button[data-testid*="view_"]:hover {
+    color: #38bdf8 !important;
+    transform: scale(1.15);
+    background: rgba(56, 189, 248, 0.1) !important;
+}
+button[data-testid*="view_"]:active {
+    transform: scale(1.05);
+}
+@media (max-width: 768px) {
+    .hero-layout {
+        margin-top: 1.2rem;
+    }
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    .upload-card {
+        padding: 0.9rem 0.95rem;
+    }
+}
+

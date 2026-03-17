@@ -1,0 +1,62 @@
+
+SERVICE AGREEMENT
+
+This Service Agreement ("Agreement") is entered into on January 15, 2024, between 
+ABC Corporation ("Client") and XYZ Services Inc. ("Provider").
+
+1. SERVICES
+Provider agrees to deliver software development services including:
+- Application development and maintenance
+- Quality assurance and testing
+- Technical support during business hours (9 AM - 5 PM EST)
+
+2. PAYMENT TERMS
+- Monthly fee: $50,000 USD
+- Payment due within 30 days of invoice date
+- Late payment fee: 2% per month
+- Currency: United States Dollars
+
+3. SERVICE LEVEL AGREEMENT
+- Uptime guarantee: 99.9%
+- Response time: < 4 hours for critical issues
+- Resolution time: < 24 hours for critical issues
+- Monthly performance reports required
+
+4. INTELLECTUAL PROPERTY
+All code, documentation, and deliverables developed under this Agreement shall be 
+the exclusive property of Client. Provider retains rights to pre-existing 
+proprietary tools and frameworks.
+
+5. CONFIDENTIALITY
+Both parties agree to maintain confidentiality of all proprietary information 
+shared during the term of this Agreement. This obligation survives termination 
+for a period of 3 years.
+
+6. DATA PROTECTION
+Provider agrees to comply with GDPR, CCPA, and all applicable data protection 
+regulations. Personal data shall be encrypted in transit and at rest.
+
+7. LIABILITY AND INDEMNIFICATION
+Provider's total liability shall not exceed the total fees paid in the 12 months 
+preceding the claim. Provider shall indemnify Client against claims arising from 
+Provider's breach of confidentiality or data protection obligations.
+
+8. TERM AND TERMINATION
+- Initial term: 12 months
+- Auto-renewal: 12-month periods unless terminated with 60 days notice
+- Either party may terminate for material breach with 30 days notice
+- Upon termination, Provider shall return all Client data within 14 days
+
+9. GOVERNING LAW
+This Agreement shall be governed by the laws of the State of New York, United States.
+Disputes shall be resolved through binding arbitration in New York, NY.
+
+10. EXPORT CONTROL
+Provider acknowledges that services may be subject to U.S. export control laws 
+and agrees to comply with all applicable regulations including ITAR and EAR.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement as of the date first written above.
+
+ABC Corporation                    XYZ Services Inc.
+_________________                  _________________
+Signature                          Signature
